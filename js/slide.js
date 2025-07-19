@@ -18,11 +18,23 @@ export default class Slide {
   }
 
   onStart(event) {
-    console.log("clicou")
-    event.preventDefault()
 
-    this.distancies.startX = event.clientX;
-    this.slideContainer.addEventListener("mousemove", this.onMouseMove)
+    console.log("clicou")
+    let moveType;
+
+    // Condição para verificar se o usuário está usando um mouse.
+    if (event.type === "mousedown") {
+
+      event.preventDefault()
+      this.distancies.startX = event.clientX;
+      moveType = "mousemove"
+
+    } else {
+      this.distancies.startX = event.changedTouches[0].clientX
+      moveType = "touchmove"
+    }
+
+    this.slideContainer.addEventListener(moveType, this.onMouseMove)
   }
 
   updatePosition(clientMouseX) {
@@ -39,22 +51,33 @@ export default class Slide {
 
   onMouseMove(event) {
     console.log("moveu")
-    const finalPosition = this.updatePosition(event.clientX)
+    // Posição do ponteiro ao clicar com o mouse, ou a posição do dedo do usuário
+    // ao clicar na tela do seu celular.
+
+    const userIndicatedPosition = (event.type === "mousemove") ? event.clientX
+      : event.changedTouches[0].clientX
+
+    const finalPosition = this.updatePosition(userIndicatedPosition)
 
     this.slideMove(finalPosition)
   }
 
   onEnd(event) {
     console.log("Cabou-se")
-    this.slideContainer.removeEventListener("mousemove", this.onMouseMove)
+
+    const eventType = (event.type === "mouseup") ? "mousemove" : "touchmove"
+
+    this.slideContainer.removeEventListener(eventType, this.onMouseMove)
 
     this.distancies.finalPosition = this.distancies.movedPosition
-    console.log(this.distancies.finalPosition)
   }
 
   addSlideEvents() {
     this.slideContainer.addEventListener("mousedown", this.onStart)
+    this.slideContainer.addEventListener("touchstart", this.onStart)
+
     this.slideContainer.addEventListener("mouseup", this.onEnd)
+    this.slideContainer.addEventListener("touchend", this.onEnd)
   }
 
   bindEvents() {
