@@ -86,9 +86,51 @@ export default class Slide {
     this.onEnd = this.onEnd.bind(this)
   }
 
+  //Slide img config
+
+  getCenterPositionSlideImage(slide) {
+    const margin = (this.slideContainer.offsetWidth - slide.offsetWidth) / 2
+    const centerPosition = - (slide.offsetLeft - margin)
+
+    return centerPosition
+  }
+
+  getSlideNavigationInfo(currentSlideIndex) {
+    const lastIndex = this.slideArray.length - 1
+
+    this.slideNavigationInfo = {
+      previousImageIndex: (currentSlideIndex !== 0) ? currentSlideIndex - 1 : undefined,
+      currentImageIndex: currentSlideIndex,
+      nextImageIndex: (currentSlideIndex !== lastIndex) ? currentSlideIndex + 1 : undefined
+
+    }
+  }
+
+  changeSelectedSlide(index) {
+    const currentSlideImage = this.slideArray[index]
+
+    this.slideMove(this.slideArray[index].slidePosition)
+    this.getSlideNavigationInfo(index)
+
+    this.distancies.finalPosition = currentSlideImage.slidePosition
+  }
+
+  slideConfig() {
+    this.slideArray = [...this.slide.children]
+    this.slideArray = this.slideArray.map((slideImage) => {
+      const slidePosition = this.getCenterPositionSlideImage(slideImage);
+      return {
+        slidePosition,
+        slideImage
+      }
+    })  
+    console.log(this.slideArray)
+  }
+
   init() {
     if (this.slide && this.slideContainer) {
       this.addSlideEvents()
+      this.slideConfig()
     }
 
     return this
