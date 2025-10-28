@@ -1,6 +1,6 @@
 export default class Slide {
 
-  constructor(slideCssSelector, slideContainerCssSelector) {
+  constructor(slideCssSelector, slideContainerCssSelector, initialImageSlideIndex) {
 
     this.slide = document.querySelector(slideCssSelector)
     this.slideContainer = document.querySelector(slideContainerCssSelector)
@@ -15,6 +15,10 @@ export default class Slide {
     }
 
     this.bindEvents()
+  }
+
+  smoothTransitionBetweenSlideImages(active) {
+    this.slide.style.transition = active ? "transform .3s" : ""
   }
 
   onStart(event) {
@@ -35,6 +39,8 @@ export default class Slide {
     }
 
     this.slideContainer.addEventListener(moveType, this.onMouseMove)
+
+    this.smoothTransitionBetweenSlideImages(false)
   }
 
   updatePosition(clientMouseX) {
@@ -70,6 +76,22 @@ export default class Slide {
     this.slideContainer.removeEventListener(eventType, this.onMouseMove)
 
     this.distancies.finalPosition = this.distancies.movedPosition
+  
+    this.smoothTransitionBetweenSlideImages(true)
+    this.centerSlideWhenMovementOccur()
+
+  }
+
+  centerSlideWhenMovementOccur() {
+
+    if (this.distancies.movementRange >= 120 && this.slideNavigationInfo.nextImageIndex !== undefined) {
+      this.goToNextSlideImage()
+
+    } else if (this.distancies.movementRange < -120 && this.slideNavigationInfo.previousImageIndex !== undefined) {
+      this.goToPreviousSlideImage()
+    } else  {
+      this.changeSelectedSlide(this.slideNavigationInfo.currentImageIndex)
+    }
   }
 
   addSlideEvents() {
@@ -115,6 +137,24 @@ export default class Slide {
     this.distancies.finalPosition = currentSlideImage.slidePosition
   }
 
+  goToPreviousSlideImage() {
+
+    const previousImageIndex = this.slideNavigationInfo.previousImageIndex
+
+    if (previousImageIndex !== undefined) {
+      this.changeSelectedSlide(previousImageIndex)
+    }
+  }
+
+  goToNextSlideImage() {
+
+    const nextImageIndex = this.slideNavigationInfo.nextImageIndex
+
+    if (nextImageIndex !== undefined) {
+      this.changeSelectedSlide(nextImageIndex)
+    }
+  }
+
   slideConfig() {
     this.slideArray = [...this.slide.children]
     this.slideArray = this.slideArray.map((slideImage) => {
@@ -123,12 +163,13 @@ export default class Slide {
         slidePosition,
         slideImage
       }
-    })  
+    })
     console.log(this.slideArray)
   }
 
   init() {
     if (this.slide && this.slideContainer) {
+      this.smoothTransitionBetweenSlideImages(true)
       this.addSlideEvents()
       this.slideConfig()
     }
