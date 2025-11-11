@@ -1,3 +1,5 @@
+import debounce from "./debounce.js"
+
 export default class Slide {
 
   constructor(slideCssSelector, slideContainerCssSelector, initialImageSlideIndex) {
@@ -14,6 +16,8 @@ export default class Slide {
 
     }
 
+    this.activeClassName = "active"
+
     this.bindEvents()
   }
 
@@ -23,7 +27,7 @@ export default class Slide {
 
   onStart(event) {
 
-    console.log("clicou")
+    // console.log("clicou")
     let moveType;
 
     // Condição para verificar se o usuário está usando um mouse.
@@ -56,7 +60,7 @@ export default class Slide {
   }
 
   onMouseMove(event) {
-    console.log("moveu")
+    // console.log("moveu")
     // Posição do ponteiro ao clicar com o mouse, ou a posição do dedo do usuário
     // ao clicar na tela do seu celular.
 
@@ -69,14 +73,14 @@ export default class Slide {
   }
 
   onEnd(event) {
-    console.log("Cabou-se")
+    // console.log("Cabou-se")
 
     const eventType = (event.type === "mouseup") ? "mousemove" : "touchmove"
 
     this.slideContainer.removeEventListener(eventType, this.onMouseMove)
 
     this.distancies.finalPosition = this.distancies.movedPosition
-  
+
     this.smoothTransitionBetweenSlideImages(true)
     this.centerSlideWhenMovementOccur()
 
@@ -89,24 +93,12 @@ export default class Slide {
 
     } else if (this.distancies.movementRange < -120 && this.slideNavigationInfo.previousImageIndex !== undefined) {
       this.goToPreviousSlideImage()
-    } else  {
+    } else {
       this.changeSelectedSlide(this.slideNavigationInfo.currentImageIndex)
     }
   }
 
-  addSlideEvents() {
-    this.slideContainer.addEventListener("mousedown", this.onStart)
-    this.slideContainer.addEventListener("touchstart", this.onStart)
 
-    this.slideContainer.addEventListener("mouseup", this.onEnd)
-    this.slideContainer.addEventListener("touchend", this.onEnd)
-  }
-
-  bindEvents() {
-    this.onStart = this.onStart.bind(this)
-    this.onMouseMove = this.onMouseMove.bind(this)
-    this.onEnd = this.onEnd.bind(this)
-  }
 
   //Slide img config
 
@@ -135,6 +127,19 @@ export default class Slide {
     this.getSlideNavigationInfo(index)
 
     this.distancies.finalPosition = currentSlideImage.slidePosition
+    this.setActiveStateToTheFocusedImage()
+  }
+
+  setActiveStateToTheFocusedImage() {
+    this.unsetActiveStateToUnfocusedImages()
+
+    this.slideArray[this.slideNavigationInfo.currentImageIndex]
+      .slideImage.classList.add(this.activeClassName)
+  }
+  unsetActiveStateToUnfocusedImages() {
+    this.slideArray.forEach(li => {
+      li.slideImage.classList.remove(this.activeClassName)
+    });
   }
 
   goToPreviousSlideImage() {
@@ -155,6 +160,31 @@ export default class Slide {
     }
   }
 
+  onWindowResize() {
+    setTimeout(() => {
+      this.slideConfig()
+      this.changeSelectedSlide(this.slideNavigationInfo.currentImageIndex)
+    }, 500)
+  }
+
+  addSlideEvents() {
+    this.slideContainer.addEventListener("mousedown", this.onStart)
+    this.slideContainer.addEventListener("touchstart", this.onStart)
+
+    this.slideContainer.addEventListener("mouseup", this.onEnd)
+    this.slideContainer.addEventListener("touchend", this.onEnd)
+
+    window.addEventListener("resize", this.onWindowResize)
+  }
+
+  bindEvents() {
+    this.onStart = this.onStart.bind(this)
+    this.onMouseMove = this.onMouseMove.bind(this)
+    this.onEnd = this.onEnd.bind(this)
+    this.onWindowResize = debounce(this.onWindowResize.bind(this), 250)
+  }
+
+
   slideConfig() {
     this.slideArray = [...this.slide.children]
     this.slideArray = this.slideArray.map((slideImage) => {
@@ -164,7 +194,6 @@ export default class Slide {
         slideImage
       }
     })
-    console.log(this.slideArray)
   }
 
   init() {
