@@ -1,6 +1,6 @@
 import debounce from "./debounce.js"
 
-export default class Slide {
+export class Slide {
 
   constructor(slideCssSelector, slideContainerCssSelector, initialImageSlideIndex) {
 
@@ -178,10 +178,17 @@ export default class Slide {
   }
 
   bindEvents() {
+    // Mouse events
     this.onStart = this.onStart.bind(this)
     this.onMouseMove = this.onMouseMove.bind(this)
     this.onEnd = this.onEnd.bind(this)
+
+    // Window events 
     this.onWindowResize = debounce(this.onWindowResize.bind(this), 250)
+
+    // Slide buttons events
+    this.goToPreviousSlideImage = this.goToPreviousSlideImage.bind(this)
+    this.goToNextSlideImage = this.goToNextSlideImage.bind(this)
   }
 
 
@@ -201,8 +208,38 @@ export default class Slide {
       this.smoothTransitionBetweenSlideImages(true)
       this.addSlideEvents()
       this.slideConfig()
+      this.changeSelectedSlide(4)
     }
 
     return this
   }
+}
+
+export class SlideNav extends Slide {
+
+  constructor(slideCssSelector, slideContainerCssSelector,
+    previousImageButtonCssSelector, nextImageButtonCssSelector,
+    initialImageSlideIndex) {
+
+    super(slideCssSelector, slideContainerCssSelector, initialImageSlideIndex)
+
+    this.defineButtonElements(previousImageButtonCssSelector, nextImageButtonCssSelector)
+    this.defineButtonEvents()
+  }
+
+  defineButtonElements(previousImageButtonCssSelector, nextImageButtonCssSelector) {
+
+    this.previousImageButtonElement =
+      document.querySelector(previousImageButtonCssSelector)
+
+    this.nextImageButtonElement =
+      document.querySelector(nextImageButtonCssSelector)
+
+  }
+
+  defineButtonEvents() {
+    this.previousImageButtonElement.addEventListener("click", this.goToPreviousSlideImage)
+    this.nextImageButtonElement.addEventListener("click", this.goToNextSlideImage)
+  }
+
 }

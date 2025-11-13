@@ -1,6 +1,4 @@
-import Slide from "./slide.js";
+import {Slide, SlideNav} from "./slide.js";
 
-const slide = new Slide(".slide", ".slide-container")
+const slide = new SlideNav(".slide", ".slide-container", ".arrow-next-button", ".arrow-previous-button" )
 slide.init()
-slide.changeSelectedSlide(4)
-// console.log(slide.slideArray)
