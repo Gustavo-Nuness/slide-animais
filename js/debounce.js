@@ -1,7 +1,7 @@
 export default function debounce(callback, delay) {
   let timer;
   return (...args) => {
-    console.log(...args)
+    //console.log(...args)
     if (timer) {
       clearTimeout(timer)
     }
