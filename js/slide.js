@@ -17,8 +17,10 @@ export class Slide {
     }
 
     this.activeClassName = "active"
-
+    this.changedSlideEvent = new Event("slide-changed")
     this.bindEvents()
+    this.init()
+
   }
 
   smoothTransitionBetweenSlideImages(active) {
@@ -128,6 +130,7 @@ export class Slide {
 
     this.distancies.finalPosition = currentSlideImage.slidePosition
     this.setActiveStateToTheFocusedImage()
+    this.slideContainer.dispatchEvent(this.changedSlideEvent)
   }
 
   setActiveStateToTheFocusedImage() {
@@ -223,11 +226,14 @@ export class SlideNav extends Slide {
 
     super(slideCssSelector, slideContainerCssSelector, initialImageSlideIndex)
 
-    this.defineButtonElements(previousImageButtonCssSelector, nextImageButtonCssSelector)
-    this.defineButtonEvents()
+    this.defineNextAndPrevButtonElements(previousImageButtonCssSelector, nextImageButtonCssSelector)
+    this.defineNextAndPrevButtonEvents()
+    this.bindSlideControlEvents()
+    this.addSlideNavigationControl()
+
   }
 
-  defineButtonElements(previousImageButtonCssSelector, nextImageButtonCssSelector) {
+  defineNextAndPrevButtonElements(previousImageButtonCssSelector, nextImageButtonCssSelector) {
 
     this.previousImageButtonElement =
       document.querySelector(previousImageButtonCssSelector)
@@ -237,9 +243,62 @@ export class SlideNav extends Slide {
 
   }
 
-  defineButtonEvents() {
+  defineNextAndPrevButtonEvents() {
     this.previousImageButtonElement.addEventListener("click", this.goToPreviousSlideImage)
     this.nextImageButtonElement.addEventListener("click", this.goToNextSlideImage)
   }
 
+  createNavigationButtonsBetweenSlideImages() {
+
+    const ulElementForListOfButtons = document.createElement("ul")
+    ulElementForListOfButtons.dataset.slideNavigationControl = "slide-control"
+
+    this.slideArray.forEach((slideImage, index) => {
+
+      ulElementForListOfButtons.innerHTML += `<li> <a href='#slide-image-${index}'> ${index} </a>  </li>`
+    })
+
+    this.slideContainer.appendChild(ulElementForListOfButtons)
+
+    return ulElementForListOfButtons
+  }
+
+  createNavigationButtonEvent(liElement, index) {
+
+    liElement.addEventListener("click", (event) => {
+      event.preventDefault()
+      this.changeSelectedSlide(index)
+      this.addActiveClassToLiWhenNavigationButtonIsUsed()
+    })
+    this.slideContainer.addEventListener("slide-changed", this.addActiveClassToLiWhenNavigationButtonIsUsed)
+  }
+
+  addActiveClassToLiWhenNavigationButtonIsUsed() {
+    this.removeActiveClassFromLisWhenNavigationButtonIsUsed()
+
+    this.liButtonsSlideControl[this.slideNavigationInfo.currentImageIndex]
+      .classList.add(this.activeClassName)
+  }
+  removeActiveClassFromLisWhenNavigationButtonIsUsed() {
+    this.liButtonsSlideControl.forEach((li) => {
+      li.classList.remove(this.activeClassName)
+    })
+  }
+
+  addSlideNavigationControl(customControlCssSelector) {
+
+    this.ulSlideControl = document.querySelector(customControlCssSelector) ||
+      this.createNavigationButtonsBetweenSlideImages()
+
+    this.liButtonsSlideControl = [...this.ulSlideControl.children]
+    this.liButtonsSlideControl.forEach(this.createNavigationButtonEvent)
+
+    this.addActiveClassToLiWhenNavigationButtonIsUsed()
+  }
+
+  bindSlideControlEvents() {
+    this.createNavigationButtonEvent = this.createNavigationButtonEvent.bind(this)
+    this.addActiveClassToLiWhenNavigationButtonIsUsed =
+      this.addActiveClassToLiWhenNavigationButtonIsUsed.bind(this)
+  }
 }
