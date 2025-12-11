@@ -1,4 +1,4 @@
-import {Slide, SlideNav} from "./slide.js";
+import SlideNav from "./slide.js";
 
-const slide = new SlideNav(".slide", ".slide-container", ".arrow-next-button", ".arrow-previous-button" )
-//slide.init()
+const slide = new SlideNav(".slide", ".slide-container", ".arrow-previous-button", ".arrow-next-button" )
+slide.addSlideNavigationControl(".custom-controls")
