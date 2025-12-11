@@ -218,10 +218,10 @@ export class Slide {
   }
 }
 
-export class SlideNav extends Slide {
+export default class SlideNav extends Slide {
 
   constructor(slideCssSelector, slideContainerCssSelector,
-    previousImageButtonCssSelector, nextImageButtonCssSelector,
+    previousImageButtonCssSelector, nextImageButtonCssSelector, customControlCssSelector,
     initialImageSlideIndex) {
 
     super(slideCssSelector, slideContainerCssSelector, initialImageSlideIndex)
@@ -229,7 +229,7 @@ export class SlideNav extends Slide {
     this.defineNextAndPrevButtonElements(previousImageButtonCssSelector, nextImageButtonCssSelector)
     this.defineNextAndPrevButtonEvents()
     this.bindSlideControlEvents()
-    this.addSlideNavigationControl()
+    this.addSlideNavigationControl(customControlCssSelector)
 
   }
 
